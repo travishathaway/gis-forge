@@ -93,8 +93,6 @@ jobs:
       - name: Publish to prefix.dev
         shell: bash
         if: github.event_name == 'push'
-        env:
-          PREFIX_API_KEY: ${{ secrets.PREFIX_API_KEY }}
         run: |
           for file in output/**/*.conda; do
             rattler-build upload prefix -c gis-forge "$file"
