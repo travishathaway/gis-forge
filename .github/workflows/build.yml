@@ -1,6 +1,6 @@
-name: Build all packages
+name: Build packages
 
-# this is important for trusted publishing
+# required for trusted publishing to prefix.dev
 permissions:
   id-token: write
 
@@ -8,64 +8,89 @@ on:
   push:
     branches:
       - main
-  workflow_dispatch:
   pull_request:
     branches:
       - main
 
 jobs:
-  build:
-    strategy:
-      matrix:
-        include:
-          - target: linux-64
-            os: ubuntu-latest
-            variant_config: "variant_config_linux-64.yaml"
-
-          - target: linux-aarch64
-            os: ubuntu-latest-arm
-            variant_config: "variant_config_linux-aarch64.yaml"
-          
-          - target: win-64
-            os: windows-latest
-            variant_config: "variant_config_win64.yaml"
-
-          - target: osx-arm64
-            os: macos-14
-            variant_config: "variant_config_osx-arm64.yaml"
-
-      fail-fast: false
-
-    name: ${{ matrix.target }}
-    runs-on: ${{ matrix.os }}
+  detect-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      recipes: ${{ steps.changed.outputs.recipes }}
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 2
+          fetch-depth: 0
+
+      - name: Find changed recipe directories
+        id: changed
+        shell: bash
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            BASE=${{ github.event.pull_request.base.sha }}
+          else
+            BASE=$(git rev-parse HEAD^)
+          fi
+          RECIPES=$(git diff --name-only "$BASE" HEAD \
+            | cut -d/ -f1 \
+            | sort -u \
+            | while read dir; do [ -f "$dir/recipe.yaml" ] && echo "$dir"; done \
+            | jq -R . | jq -sc .)
+          echo "recipes=$RECIPES" >> $GITHUB_OUTPUT
+          echo "Changed recipes: $RECIPES"
+
+  build:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.recipes != '[]'
+    strategy:
+      fail-fast: false
+      matrix:
+        recipe: ${{ fromJson(needs.detect-changes.outputs.recipes) }}
+        platform:
+          - target: linux-64
+            os: ubuntu-latest
+            variant_config: variants.linux-64.yaml
+
+          - target: linux-aarch64
+            os: ubuntu-latest-arm
+            variant_config: variants.linux_aarch64.yaml
+
+          - target: win-64
+            os: windows-latest
+            variant_config: variants.win-64.yaml
+
+          - target: osx-arm64
+            os: macos-14
+            variant_config: variants.osx_arm-64.yaml
+
+    name: ${{ matrix.recipe }} (${{ matrix.platform.target }})
+    runs-on: ${{ matrix.platform.os }}
+    steps:
+      - uses: actions/checkout@v4
 
       - uses: prefix-dev/setup-pixi@v0.8.1
         with:
           pixi-version: v0.63.2
 
-      - name: Add .pixi/envs/default/bin to the $PATH
+      - name: Add pixi env to PATH
+        shell: bash
+        run: echo "$(pwd)/.pixi/envs/default/bin" >> $GITHUB_PATH
+
+      - name: Build recipe
         shell: bash
         run: |
-          echo "$(pwd)/.pixi/envs/default/bin" >> $GITHUB_PATH
+          rattler-build build \
+            --recipe-dir ${{ matrix.recipe }} \
+            --skip-existing=all \
+            --target-platform=${{ matrix.platform.target }} \
+            -c conda-forge \
+            -c https://prefix.dev/gis-forge \
+            --variant-config=${{ matrix.recipe }}/${{ matrix.platform.variant_config }}
 
-      - name: Run code in changed subdirectories
+      - name: Publish to prefix.dev
         shell: bash
-        run: |
-          rattler-build build --recipe-dir . \
-            --skip-existing=all --target-platform=${{ matrix.target }} \
-            -c conda-forge -c https://prefix.dev/gis-forge \
-            --variant-config=${{ matrix.variant_config }}
-
-      - name: Upload all packages
-        shell: bash
-        # do not upload on PR
         if: github.event_name == 'push'
         run: |
-          # uses trusted publishers for the upload
           for file in output/**/*.conda; do
-            rattler-build upload prefix -c rust-forge "$file"
+            rattler-build upload prefix -c gis-forge "$file"
           done
