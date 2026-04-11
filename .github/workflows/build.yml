@@ -18,16 +18,16 @@ jobs:
     strategy:
       matrix:
         include:
-          - target: linux-64,
-            os: ubuntu-20.04,
+          - target: linux-64
+            os: ubuntu-20.04
             variant_config: "variant_config_linux-64.yaml"
           
-          - target: win-64,
-            os: windows-latest,
+          - target: win-64
+            os: windows-latest
             variant_config: "variant_config_win64.yaml"
 
-          - target: osx-arm64,
-            os: macos-14,
+          - target: osx-arm64
+            os: macos-14
             variant_config: "variant_config_osx-arm64.yaml"
 
       fail-fast: false
