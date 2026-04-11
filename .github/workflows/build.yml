@@ -19,11 +19,11 @@ jobs:
       matrix:
         include:
           - target: linux-64
-            os: ubuntu-20.04
+            os: ubuntu-latest
             variant_config: "variant_config_linux-64.yaml"
 
           - target: linux-aarch64
-            os: ubuntu-20.04-arm
+            os: ubuntu-latest-arm
             variant_config: "variant_config_linux-aarch64.yaml"
           
           - target: win-64
