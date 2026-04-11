@@ -34,7 +34,9 @@ jobs:
           RECIPES=$(git diff --name-only "$BASE" HEAD \
             | cut -d/ -f1 \
             | sort -u \
-            | while read dir; do [ -f "$dir/recipe.yaml" ] && echo "$dir"; done \
+            | while read dir; do
+                if [ -f "$dir/recipe.yaml" ]; then echo "$dir"; fi
+              done \
             | jq -R . | jq -sc .)
           echo "recipes=$RECIPES" >> $GITHUB_OUTPUT
           echo "Changed recipes: $RECIPES"
