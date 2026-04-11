@@ -1,4 +1,4 @@
-[project]
+[workspace]
 name = "gis-forge"
 version = "0.1.0"
 description = "GIS packages for use with conda-forge"
