@@ -54,7 +54,7 @@ jobs:
             variant_config: variants.linux-64.yaml
 
           - target: linux-aarch64
-            os: ubuntu-latest-arm
+            os: ubuntu-24.04-arm
             variant_config: variants.linux_aarch64.yaml
 
           - target: win-64
