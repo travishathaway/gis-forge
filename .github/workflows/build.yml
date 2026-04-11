@@ -60,6 +60,8 @@ jobs:
         shell: bash
         # do not upload on PR
         if: github.event_name == 'push'
+        env:
+          PREFIX_API_KEY: ${{ secrets.PREFIX_API_KEY }}
         run: |
           # uses trusted publishers for the upload
           for file in output/**/*.conda; do
