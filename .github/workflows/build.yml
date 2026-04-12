@@ -79,7 +79,19 @@ jobs:
         shell: bash
         run: echo "$(pwd)/.pixi/envs/default/bin" >> $GITHUB_PATH
 
+      - name: Check variant config exists
+        id: check_variant
+        shell: bash
+        run: |
+          if [ -f "${{ matrix.recipe }}/${{ matrix.platform.variant_config }}" ]; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+            echo "Skipping: ${{ matrix.recipe }}/${{ matrix.platform.variant_config }} not found"
+          fi
+
       - name: Build recipe
+        if: steps.check_variant.outputs.exists == 'true'
         shell: bash
         run: |
           rattler-build build \
@@ -91,8 +103,8 @@ jobs:
             --variant-config=${{ matrix.recipe }}/${{ matrix.platform.variant_config }}
 
       - name: Publish to prefix.dev
+        if: github.event_name == 'push' && steps.check_variant.outputs.exists == 'true'
         shell: bash
-        if: github.event_name == 'push'
         run: |
           for file in output/**/*.conda; do
             rattler-build upload prefix -c gis-forge "$file"
