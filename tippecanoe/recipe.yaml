@@ -1,0 +1,55 @@
+context:
+  version: "2.79.0"
+
+package:
+  name: tippecanoe
+  version: ${{ version }}
+
+source:
+  - url: https://github.com/felt/tippecanoe/archive/refs/tags/${{ version }}.tar.gz
+    sha256: b0fd9df49b6efc988288ea48774822c6de19eb48428017f27ee0b3b01d44f05d
+
+build:
+  number: 0
+  script: make -j${CPU_COUNT} PREFIX=${PREFIX} && make install PREFIX=${PREFIX}
+
+requirements:
+  build:
+    - ${{ compiler('cxx') }}
+    - ${{ stdlib('c') }}
+    - make
+
+  host:
+    - zlib
+    - sqlite
+
+  run:
+    - sqlite
+
+tests:
+  - script:
+    - tippecanoe --version
+    - tippecanoe --help
+
+about:
+  homepage: https://github.com/felt/tippecanoe
+  license: BSD-2-Clause AND BSL-1.0 AND ISC AND BSD-3-Clause AND MIT
+  license_file:
+    - LICENSE.md
+    - clipper2/LICENSE
+    - mapbox/LICENSE-geometry.hpp
+    - mapbox/LICENSE-variant
+    - mapbox/LICENSE-wagyu
+    - catch/LICENSE_1_0.txt
+    - milo/LICENSE.txt
+  summary: Build vector tilesets from large collections of GeoJSON features
+  description: >-
+    tippecanoe builds vector tilesets from large collections of GeoJSON features.
+    The goal is to enable mapping at any zoom level, showing a reasonably complete
+    representation of the data at every level from the entire world to a single building.
+  documentation: https://github.com/felt/tippecanoe
+  repository: https://github.com/felt/tippecanoe
+
+extra:
+  recipe-maintainers:
+    - travishathaway
