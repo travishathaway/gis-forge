@@ -11,6 +11,19 @@ on:
   pull_request:
     branches:
       - main
+  workflow_dispatch:
+    inputs:
+      server:
+        description: 'Upload server'
+        required: true
+        type: choice
+        options:
+          - prefix
+          - anaconda
+      package:
+        description: 'Package to build (e.g. osm2pgsql, tippecanoe)'
+        required: true
+        type: string
 
 jobs:
   detect-changes:
@@ -26,18 +39,27 @@ jobs:
         id: changed
         shell: bash
         run: |
-          if [ "${{ github.event_name }}" = "pull_request" ]; then
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            RECIPES='["${{ inputs.package }}"]'
+          elif [ "${{ github.event_name }}" = "pull_request" ]; then
             BASE=${{ github.event.pull_request.base.sha }}
+            RECIPES=$(git diff --name-only "$BASE" HEAD \
+              | cut -d/ -f1 \
+              | sort -u \
+              | while read dir; do
+                  if [ -f "$dir/recipe.yaml" ]; then echo "$dir"; fi
+                done \
+              | jq -R . | jq -sc .)
           else
             BASE=$(git rev-parse HEAD^)
+            RECIPES=$(git diff --name-only "$BASE" HEAD \
+              | cut -d/ -f1 \
+              | sort -u \
+              | while read dir; do
+                  if [ -f "$dir/recipe.yaml" ]; then echo "$dir"; fi
+                done \
+              | jq -R . | jq -sc .)
           fi
-          RECIPES=$(git diff --name-only "$BASE" HEAD \
-            | cut -d/ -f1 \
-            | sort -u \
-            | while read dir; do
-                if [ -f "$dir/recipe.yaml" ]; then echo "$dir"; fi
-              done \
-            | jq -R . | jq -sc .)
           echo "recipes=$RECIPES" >> $GITHUB_OUTPUT
           echo "Changed recipes: $RECIPES"
 
@@ -103,9 +125,19 @@ jobs:
             --variant-config=${{ matrix.recipe }}/${{ matrix.platform.variant_config }}
 
       - name: Publish to prefix.dev
-        if: github.event_name == 'push' && steps.check_variant.outputs.exists == 'true'
+        if: steps.check_variant.outputs.exists == 'true' && (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.server == 'prefix'))
         shell: bash
         run: |
           for file in output/**/*.conda; do
             rattler-build upload prefix -c gis-forge "$file"
+          done
+
+      - name: Publish to anaconda.org
+        if: steps.check_variant.outputs.exists == 'true' && (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.server == 'anaconda'))
+        shell: bash
+        env:
+          ANACONDA_API_KEY: ${{ secrets.ANACONDA_API_KEY }}
+        run: |
+          for file in output/**/*.conda; do
+            rattler-build upload anaconda -o gis-forge "$file"
           done
