@@ -1,0 +1,15 @@
+diff --git a/themes/shortbread_v1_gen/topics/streets.lua b/themes/shortbread_v1_gen/topics/streets.lua
+index 2ffe098..49a54b5 100644
+--- a/themes/shortbread_v1_gen/topics/streets.lua
++++ b/themes/shortbread_v1_gen/topics/streets.lua
+@@ -273,8 +273,8 @@ local set_ref_attributes = function(a, t)
+     local rows = 0
+     local cols = 0
+ 
+-    for word in string.gmatch(t.ref, "([^;]+);?") do
+-        word = word:gsub('^[%s]+', '', 1):gsub('[%s]+$', '', 1)
++    for w in string.gmatch(t.ref, "([^;]+);?") do
++        local word = w:gsub('^[%s]+', '', 1):gsub('[%s]+$', '', 1)
+         rows = rows + 1
+         cols = math.max(cols, string.len(word))
+         table.insert(refs, word)
