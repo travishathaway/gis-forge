@@ -143,9 +143,11 @@ jobs:
         env:
           ANACONDA_API_KEY: ${{ secrets.ANACONDA_API_KEY }}
         run: |
+          FORCE_FLAG=""
+          [ "${{ github.event_name }}" = "workflow_dispatch" ] && FORCE_FLAG="--force"
           found=0
           while IFS= read -r -d '' file; do
             found=1
-            rattler-build upload anaconda -o gis-forge "$file"
+            rattler-build upload anaconda -o gis-forge $FORCE_FLAG "$file"
           done < <(find output -name "*.conda" -print0)
           [ "$found" -eq 0 ] && echo "No .conda files to upload (all packages already exist)"
