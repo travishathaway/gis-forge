@@ -66,6 +66,10 @@ jobs:
             os: macos-14
             variant_config: variants.osx_arm-64.yaml
 
+          - target: noarch
+            os: ubuntu-latest
+            variant_config: variants.noarch.yaml
+
     name: ${{ matrix.recipe }} (${{ matrix.platform.target }})
     runs-on: ${{ matrix.platform.os }}
     steps:
