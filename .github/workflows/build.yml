@@ -116,9 +116,11 @@ jobs:
         if: steps.check_variant.outputs.exists == 'true'
         shell: bash
         run: |
+          SKIP_FLAG="--skip-existing=all"
+          [ "${{ github.event_name }}" = "workflow_dispatch" ] && SKIP_FLAG=""
           rattler-build build \
             --recipe-dir ${{ matrix.recipe }} \
-            --skip-existing=all \
+            $SKIP_FLAG \
             --target-platform=${{ matrix.platform.target }} \
             -c conda-forge \
             -c https://prefix.dev/gis-forge \
@@ -128,15 +130,12 @@ jobs:
         if: steps.check_variant.outputs.exists == 'true' && (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.server == 'prefix'))
         shell: bash
         run: |
-          shopt -s globstar nullglob
-          files=(output/**/*.conda)
-          if [ ${#files[@]} -eq 0 ]; then
-            echo "No .conda files to upload (all packages already exist)"
-            exit 0
-          fi
-          for file in "${files[@]}"; do
+          found=0
+          while IFS= read -r -d '' file; do
+            found=1
             rattler-build upload prefix -c gis-forge "$file"
-          done
+          done < <(find output -name "*.conda" -print0)
+          [ "$found" -eq 0 ] && echo "No .conda files to upload (all packages already exist)"
 
       - name: Publish to anaconda.org
         if: steps.check_variant.outputs.exists == 'true' && (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.server == 'anaconda'))
@@ -144,12 +143,9 @@ jobs:
         env:
           ANACONDA_API_KEY: ${{ secrets.ANACONDA_API_KEY }}
         run: |
-          shopt -s globstar nullglob
-          files=(output/**/*.conda)
-          if [ ${#files[@]} -eq 0 ]; then
-            echo "No .conda files to upload (all packages already exist)"
-            exit 0
-          fi
-          for file in "${files[@]}"; do
+          found=0
+          while IFS= read -r -d '' file; do
+            found=1
             rattler-build upload anaconda -o gis-forge "$file"
-          done
+          done < <(find output -name "*.conda" -print0)
+          [ "$found" -eq 0 ] && echo "No .conda files to upload (all packages already exist)"
