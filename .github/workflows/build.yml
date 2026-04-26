@@ -128,7 +128,13 @@ jobs:
         if: steps.check_variant.outputs.exists == 'true' && (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.server == 'prefix'))
         shell: bash
         run: |
-          for file in output/**/*.conda; do
+          shopt -s globstar nullglob
+          files=(output/**/*.conda)
+          if [ ${#files[@]} -eq 0 ]; then
+            echo "No .conda files to upload (all packages already exist)"
+            exit 0
+          fi
+          for file in "${files[@]}"; do
             rattler-build upload prefix -c gis-forge "$file"
           done
 
@@ -138,6 +144,12 @@ jobs:
         env:
           ANACONDA_API_KEY: ${{ secrets.ANACONDA_API_KEY }}
         run: |
-          for file in output/**/*.conda; do
+          shopt -s globstar nullglob
+          files=(output/**/*.conda)
+          if [ ${#files[@]} -eq 0 ]; then
+            echo "No .conda files to upload (all packages already exist)"
+            exit 0
+          fi
+          for file in "${files[@]}"; do
             rattler-build upload anaconda -o gis-forge "$file"
           done
