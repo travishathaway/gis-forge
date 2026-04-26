@@ -88,11 +88,11 @@ jobs:
             os: macos-14
             variant_config: variants.osx_arm-64.yaml
 
-          - target: noarch
+          - target: linux-64
             os: ubuntu-latest
             variant_config: variants.noarch.yaml
 
-    name: ${{ matrix.recipe }} (${{ matrix.platform.target }})
+    name: ${{ matrix.recipe }} (${{ matrix.platform.variant_config }})
     runs-on: ${{ matrix.platform.os }}
     steps:
       - uses: actions/checkout@v4
