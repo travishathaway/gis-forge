@@ -1,0 +1,14 @@
+--- a/themes/shortbread_v1/topics/streets.lua
++++ b/themes/shortbread_v1/topics/streets.lua
+@@ -236,8 +236,8 @@ end
+     local refs = {}
+     local rows = 0
+     local cols = 0
+
+-    for word in string.gmatch(t.ref, "([^;]+);?") do
+-        word = word:gsub('^[%s]+', '', 1):gsub('[%s]+$', '', 1)
++    for w in string.gmatch(t.ref, "([^;]+);?") do
++        local word = w:gsub('^[%s]+', '', 1):gsub('[%s]+$', '', 1)
+         rows = rows + 1
+         cols = math.max(cols, string.len(word))
+         table.insert(refs, word)

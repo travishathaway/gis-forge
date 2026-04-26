@@ -1,0 +1,58 @@
+# This project hasn't actually been released yet:
+# - https://github.com/osm2pgsql-dev/themepark/issues/20
+#
+# Once it's been released, I'll come back and package it
+#
+context:
+  version: "0.1.0"
+
+package:
+  name: osm2pgsql-themepark
+  version: ${{ version }}
+
+source:
+  - url: https://github.com/osm2pgsql-dev/osm2pgsql-themepark/archive/refs/heads/master.tar.gz
+    sha256: 09a8c8ce78ec72037c7cd79b7e79ddcfcc0c424bce0bd7c3eb2ee8db1cc78980
+    patches:
+      - patches/0001-fix-lua54-const-loop-var.patch
+      - patches/0002-fix-lua54-const-loop-var.patch
+
+build:
+  number: 0
+  noarch: generic
+  script:
+    - mkdir -p "${PREFIX}/share/osm2pgsql-themepark"
+    - cp -r lua themes config "${PREFIX}/share/osm2pgsql-themepark/"
+    - mkdir -p "${PREFIX}/etc/conda/env_vars.d"
+    - |
+      cat > "${PREFIX}/etc/conda/env_vars.d/osm2pgsql-themepark.json" << EOF
+      {
+        "THEMEPARK_PATH": "${PREFIX}/share/osm2pgsql-themepark",
+        "LUA_PATH": "${PREFIX}/share/osm2pgsql-themepark/lua/?.lua;;"
+      }
+      EOF
+
+requirements:
+  run:
+    - lua
+
+tests:
+  - script:
+      - test -d "${PREFIX}/share/osm2pgsql-themepark/lua"
+      - test -d "${PREFIX}/share/osm2pgsql-themepark/themes"
+      - test -d "${PREFIX}/share/osm2pgsql-themepark/config"
+      - test -f "${PREFIX}/etc/conda/env_vars.d/osm2pgsql-themepark.json"
+
+about:
+  homepage: https://osm2pgsql.org
+  license: Apache-2.0
+  license_file:
+    - LICENSE
+  summary: A framework for creating osm2pgsql flex configurations
+  description: This is a framework for creating osm2pgsql configurations assembled from many building blocks. Some of those blocks are provided in this repository, others you can add yourself.
+  documentation: https://osm2pgsql.org/themepark
+  repository: https://github.com/osm2pgsql-dev/osm2pgsql-themepark
+
+extra:
+  recipe-maintainers:
+    - travishathaway
