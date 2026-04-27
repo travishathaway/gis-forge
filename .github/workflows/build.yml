@@ -139,7 +139,7 @@ jobs:
             found=1
             rattler-build upload prefix -c gis-forge "$file"
           done < <(find output -name "*.conda" -print0)
-          [ "$found" -eq 0 ] && echo "No .conda files to upload (all packages already exist)"
+          if [ "$found" -eq 0 ]; then echo "No .conda files to upload (all packages already exist)"; fi
 
       - name: Publish to anaconda.org
         if: steps.check_variant.outputs.exists == 'true' && (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.server == 'anaconda'))
@@ -154,4 +154,4 @@ jobs:
             found=1
             rattler-build upload anaconda -o gis-forge $FORCE_FLAG "$file"
           done < <(find output -name "*.conda" -print0)
-          [ "$found" -eq 0 ] && echo "No .conda files to upload (all packages already exist)"
+          if [ "$found" -eq 0 ]; then echo "No .conda files to upload (all packages already exist)"; fi
