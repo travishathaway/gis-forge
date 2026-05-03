@@ -1,0 +1,46 @@
+schema_version: 1
+
+context:
+  name: osmprj
+  version: "0.1.0"
+
+package:
+  name: ${{ name|lower }}
+  version: ${{ version }}
+
+source:
+  - url: https://github.com/travishathaway/osmprj/archive/refs/tags/${{ version }}.tar.gz
+    sha256: 6b26ffc8b0333c9f34e3f960e81bdd7e2eef5017accd0f939d1ab9eda2c1d3b8
+
+build:
+  number: 0
+
+requirements:
+  build:
+    - ${{ stdlib('c') }}
+    - ${{ compiler('c') }}
+    - ${{ compiler('rust') }}
+    - cargo-bundle-licenses
+    - cargo-auditable
+  run:
+    - osm2pgsql
+    - osm2pgsql-themepark
+    - pgosm-themepark
+
+tests:
+  - script:
+      - osmprj --help
+      - osmprj init
+
+about:
+  homepage: https://github.com/travishathaway/osmprj
+  summary: OpenStreetMap and PostgreSQL project management tool
+  repository: https://github.com/travishathaway/osmprj
+  license: GPL-3.0-only
+  license_file:
+    - LICENSE
+    - THIRDPARTY.yml
+
+extra:
+  recipe-maintainers:
+    - travishathaway
