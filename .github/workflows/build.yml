@@ -127,7 +127,7 @@ jobs:
             $SKIP_FLAG \
             --target-platform=${{ matrix.platform.target }} \
             -c conda-forge \
-            -c https://prefix.dev/gis-forge \
+            -c gis-forge \
             --variant-config=${{ matrix.recipe }}/${{ matrix.platform.variant_config }}
 
       - name: Publish to prefix.dev
