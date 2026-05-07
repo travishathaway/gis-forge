@@ -13,7 +13,7 @@ source:
     sha256: 6b26ffc8b0333c9f34e3f960e81bdd7e2eef5017accd0f939d1ab9eda2c1d3b8
 
 build:
-  number: 0
+  number: 1
 
 requirements:
   build:
@@ -26,6 +26,8 @@ requirements:
     - osm2pgsql
     - osm2pgsql-themepark
     - pgosm-themepark
+    - psycopg
+    - pyosmium
 
 tests:
   - script:
