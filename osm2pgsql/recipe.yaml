@@ -39,11 +39,14 @@ requirements:
     - proj
     - bzip2
     - lua
+    - pyosmium
+    - psycopg
 
 tests:
   - script:
     - osm2pgsql --version
     - osm2pgsql --help
+    - osm2pgsql-replication --help
 
 about:
   homepage: https://osm2pgsql.org
