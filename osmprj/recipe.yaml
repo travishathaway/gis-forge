@@ -2,7 +2,7 @@ schema_version: 1
 
 context:
   name: osmprj
-  version: "0.2.0"
+  version: "0.3.0"
 
 package:
   name: ${{ name|lower }}
@@ -10,7 +10,7 @@ package:
 
 source:
   - url: https://github.com/travishathaway/osmprj/archive/refs/tags/${{ version }}.tar.gz
-    sha256: 54bb83067b147f0dfdfdb6160989e89b2c75d785c3e26c9651f2263570f575c6
+    sha256: b0c72202c1f5c0f19d10d39e81a642d4354baf40f1529b1c400a214585f31a78
 
 build:
   number: 0
