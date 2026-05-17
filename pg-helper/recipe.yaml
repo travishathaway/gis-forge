@@ -1,0 +1,50 @@
+schema_version: 1
+
+context:
+  name: pg-helper
+  version: 0.2.0
+  python_min: "3.10"
+
+package:
+  name: ${{ name|lower }}
+  version: ${{ version }}
+
+source:
+  url: https://github.com/travishathaway/pg-helper/archive/refs/tags/${{ version }}.tar.gz
+  sha256: 4e90bdddfd32e645f247f026d4699659473db5ee9dc3836ae8c780052a29bf2f
+
+build:
+  number: 0
+  noarch: python
+  script: ${{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
+  python:
+    entry_points:
+      - pg-helper = pg_helper.cli:main
+
+requirements:
+  host:
+    - python ==${{ python_min }}
+    - hatchling >=1.27.0
+    - pip
+  run:
+    - python >=${{ python_min }}
+    - psycopg >=3
+
+tests:
+  - python:
+      pip_check: true
+  - requirements:
+      run:
+        - python ==${{ python_min }}
+    script:
+      - pg-helper --help
+
+about:
+  summary: Small set of commands to help manage a PostgresSQL server 
+  license: MIT
+  license_file: LICENSE
+  homepage: https://github.com/travishathaway/pg-helper
+
+extra:
+  recipe-maintainers:
+    - travishathaway
