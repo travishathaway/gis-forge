@@ -1,0 +1,40 @@
+package:
+  name: pgosm-themepark
+  version: "0.1.0"
+
+source:
+  url: https://github.com/travishathaway/pgosm-themepark/archive/refs/tags/${{ version }}.tar.gz
+  sha256: adbc5cc76056ced5acccb4a4eb52fbcc8b694c206f0c4e14c022a750bc16b7b7
+
+build:
+  noarch: generic
+  number: 0
+  script:
+    - luarocks make --tree="${PREFIX}" --deps-mode=none --no-manifest pgosm-themepark-0.1.0-1.rockspec
+
+requirements:
+  host:
+    - lua
+    - luarocks
+  run:
+    - osm2pgsql
+    - osm2pgsql-themepark
+
+# TODO: Create an end-to-end test that actually imports OSM data
+# tests:
+#   - script:
+#     - osm2pgsql
+
+about:
+  homepage: https://github.com/travishathaway/pgosm-themepark
+  license: MIT
+  license_file:
+    - LICENSE
+  summary: A osm2pgsql-themepark theme inspired by pgosm-flex
+  description: A osm2pgsql-themepark theme inspired by pgosm-flex
+  documentation: https://github.com/travishathaway/pgosm-themepark
+  repository: https://github.com/travishathaway/pgosm-themepark
+
+extra:
+  recipe-maintainers:
+    - travishathaway
