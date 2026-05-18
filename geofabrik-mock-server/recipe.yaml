@@ -1,0 +1,61 @@
+schema_version: 1
+
+context:
+  name: geofabrik-mock-server
+  version: 0.1.0
+  python_min: "3.10"
+  date: "2026-05-12"
+
+package:
+  name: ${{ name|lower }}
+  version: ${{ version }}
+
+source:
+  url: https://github.com/travishathaway/geofabrik-mock-server/archive/refs/tags/${{ version }}.tar.gz
+  sha256: 8eda8b6e896d2a453fd2c44b7f691f436254f3b5228b0f7c37768d0f7e84c748
+
+build:
+  number: 0
+  noarch: python
+  script:
+    file: build.sh
+    env:
+      GEOFABRIK_MOCK_SERVER_DATE: ${{ date }}
+  python:
+    entry_points:
+      - gms = geofabrik_mock_server.cli:main
+
+requirements:
+  host:
+    - python >=${{ python_min }}
+    - hatchling >=1.27.0
+    - pip
+    # These are needed here because the build.sh runs the CLI itself
+    # runs during the build.
+    - click
+    - flask
+    - requests
+  run:
+    - python >=${{ python_min }}
+    - click
+    - flask
+    - requests
+
+tests:
+  - python:
+      pip_check: true
+  - requirements:
+      run:
+        - python >=${{ python_min }}
+    script:
+      - gms --help
+
+about:
+  summary: HTTP server that serves a mock version of download.geofabrik.de
+  license: MIT
+  license_file: LICENSE
+  homepage: https://github.com/travishathaway/geofabrik-mock-server
+
+extra:
+  recipe-maintainers:
+    - travishathaway
