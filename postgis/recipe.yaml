@@ -19,13 +19,10 @@ requirements:
     - if: win
       then:
         - autotools_clang_conda
-        # clang 22 reorganized its x86 intrinsic headers: immintrin.h now
-        # includes mmintrin.h unconditionally (the __MMX__ include guard was
-        # removed), and that header fails to compile in C++ when MMX is
-        # disabled. The MSVC STL drags it in via <algorithm> -> ... ->
-        # wchar.h -> intrin.h, so the -mno-mmx workaround in build.sh no
-        # longer helps. Pin to clang 21, which honors -mno-mmx and is the
-        # toolchain this recipe is built/tested against.
+        # Conservative toolchain hold. The Windows C++ mmintrin.h build break
+        # is actually caused by -mno-mmx in build.sh (removed there), not by the
+        # clang version -- clang 21 and 22 ship the same SSE2-based mmintrin.h.
+        # This pin can be relaxed/removed once the build is confirmed green.
         - clang <22
         - clangxx <22
     - if: not win

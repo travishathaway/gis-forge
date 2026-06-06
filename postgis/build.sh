@@ -122,13 +122,17 @@ COMPATEOF
     # Only set for C (not C++) to avoid conflicts with MSVC C++ STL headers.
     export CFLAGS="${WIN_COMPAT_DEFS} -D__GNUC__=4 ${CFLAGS}"
     # MSVC C++ STL headers require C++14 or later.
-    # -mno-mmx prevents __MMX__ from being defined, which stops immintrin.h
-    # from including mmintrin.h. Clang 21's mmintrin.h uses GNU C compound
-    # vector literals that are not valid C++; on Windows SDK 10.0.26100.0+,
-    # wchar.h pulls in intrin.h -> mmintrin.h through the MSVC STL chain
-    # (algorithm -> __msvc_heap_algorithms.hpp -> xutility -> cwchar -> wchar.h).
-    # PostGIS and FlatBuffers do not use MMX intrinsics directly, so this is safe.
-    export CXXFLAGS="${WIN_COMPAT_DEFS} -std=c++17 -mno-mmx ${CXXFLAGS}"
+    # NOTE: do NOT add -mno-mmx here. On Windows SDK 10.0.26100.0+ the MSVC STL
+    # transitively includes clang's <intrin.h> -> x86intrin.h -> immintrin.h ->
+    # mmintrin.h (algorithm -> __msvc_heap_algorithms.hpp -> xutility -> cwchar
+    # -> wchar.h), and that include is unconditional -- there is no __MMX__
+    # guard, so -mno-mmx cannot prevent it. clang's mmintrin.h is the SSE2-based
+    # reimplementation and compiles in C++ with the default x86-64 feature set
+    # (MMX/SSE2 on). -mno-mmx instead demotes the 8-byte MMX-width vector types
+    # (__m64/__v2si) to scalars, which breaks the header's vector casts with
+    # "function-style cast to a builtin type can only take one argument".
+    # PostGIS/FlatBuffers do not use MMX intrinsics, so default flags are safe.
+    export CXXFLAGS="${WIN_COMPAT_DEFS} -std=c++17 ${CXXFLAGS}"
     export CPPFLAGS="${WIN_COMPAT_DEFS} ${CPPFLAGS}"
 fi
 
