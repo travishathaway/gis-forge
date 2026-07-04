@@ -1,0 +1,43 @@
+schema_version: 1
+
+context:
+  name: openrouteservice
+  version: "9.9.0"
+
+package:
+  name: ${{ name }}
+  version: ${{ version }}
+
+source:
+  url: https://github.com/GIScience/openrouteservice/archive/refs/tags/v${{ version }}.tar.gz
+  sha256: a4ac092d41ba1739fb61c7f5c73cf2a16fa0369d9381b191ecdca8065fe42e60
+
+build:
+  number: 0
+  noarch: generic
+  script:
+    file: build.sh
+
+requirements:
+  build:
+    - maven
+    - openjdk =21
+  run:
+    - openjdk >=17
+
+tests:
+  - script:
+      - jar tf "$CONDA_PREFIX/share/openrouteservice/ors.jar" > /dev/null
+
+about:
+  homepage: https://openrouteservice.org
+  repository: https://github.com/GIScience/openrouteservice
+  license: LGPL-3.0-or-later
+  license_file:
+    - LICENSE
+    - LICENSE.LESSER
+  summary: Open-source route planning service based on OpenStreetMap data
+
+extra:
+  recipe-maintainers:
+    - travishathaway
