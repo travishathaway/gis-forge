@@ -1,0 +1,56 @@
+schema_version: 1
+
+context:
+  name: ors-launcher
+  version: "0.1.0"
+  python_min: "3.10"
+
+package:
+  name: ${{ name|lower }}
+  version: ${{ version }}
+
+source:
+  url: https://github.com/travishathaway/ors-launcher/archive/refs/tags/${{ version }}.tar.gz
+  sha256: 0a2c355b265c0d954aadb363bc355495c474a47b6d1e3aa93d6440b9d1df3652
+
+build:
+  number: 0
+  noarch: python
+  script: ${{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
+  python:
+    entry_points:
+      - orsl = ors_launcher.main:cli
+      - ors-launcher = ors_launcher.main:cli
+
+requirements:
+  host:
+    - python ==${{ python_min }}
+    - hatchling >=1.27.0
+    - pip
+  run:
+    - python >=${{ python_min }}
+    - click >=8.3.1
+    - rich >=14.3.3
+    - pydantic >=2.9
+    - pyyaml >=6.0
+    - openrouteservice
+
+tests:
+  - python:
+      pip_check: true
+  - requirements:
+      run:
+        - python ==${{ python_min }}
+    script:
+      - orsl --help
+      - ors-launcher --help
+
+about:
+  summary: CLI for configuring and running a local OpenRouteService (ORS) instance
+  license: GPL-3.0-only
+  license_file: LICENSE
+  homepage: https://github.com/travishathaway/ors-launcher
+
+extra:
+  recipe-maintainers:
+    - travishathaway
